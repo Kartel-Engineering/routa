@@ -16,14 +16,6 @@ spec:
       type: DOMAIN
       name: Application Domain
       description: The domain to bind Routa to
-    - key: GITHUB_USER
-      type: STRING
-      name: GitHub Username
-      description: GitHub username for GHCR authentication (e.g. Kartel-Engineering)
-    - key: GITHUB_TOKEN
-      type: PASSWORD
-      name: GitHub PAT
-      description: GitHub Personal Access Token with read:packages scope for pulling the private Docker image
   services:
     # ── PostgreSQL Database ──────────────────────────────────────────────
     - name: postgres
@@ -64,8 +56,6 @@ spec:
       spec:
         source:
           image: ghcr.io/kartel-engineering/routa:latest
-          username: ${GITHUB_USER}
-          password: ${GITHUB_TOKEN}
         ports:
           - id: web
             port: 3000
@@ -89,6 +79,9 @@ spec:
             default: '3000'
           HOSTNAME:
             default: '0.0.0.0'
+          RUN_MIGRATIONS:
+            default: 'true'
+            description: Run drizzle-kit push on startup
           ANTHROPIC_AUTH_TOKEN:
             default: ''
             description: Your Anthropic API key for Claude Code SDK

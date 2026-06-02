@@ -81,12 +81,12 @@ COPY src/core/db/pg-*.ts ./src/core/db/
 COPY src/core/kanban/ ./src/core/kanban/
 COPY src/core/models/ ./src/core/models/
 
-# Entrypoint: run migration if postgres, then start server
+# Entrypoint: run migration if enabled and postgres, then start server
 COPY <<'EOF' /entrypoint.sh
 #!/bin/sh
 set -e
 
-if [ "${ROUTA_DB_DRIVER}" = "postgres" ] && [ -n "${DATABASE_URL}" ]; then
+if [ "${RUN_MIGRATIONS}" = "true" ] && [ "${ROUTA_DB_DRIVER}" = "postgres" ] && [ -n "${DATABASE_URL}" ]; then
   echo "[entrypoint] Running database migration..."
   cd /app
   echo "[entrypoint] Using drizzle-kit from: $(which drizzle-kit 2>/dev/null || echo '(not in PATH)')"

@@ -68,10 +68,44 @@ COPY --from=builder /app/public ./public
 # Data directory for SQLite database
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 
+# Database migration tools for runtime schema push (Postgres support)
+# drizzle-orm is already in standalone node_modules (prod dep)
+# These are devDeps not included in standalone output
+RUN npm install --no-save drizzle-kit@0.31.9 tsx@4.21.0 postgres@3.4.8
+
+# Copy drizzle config and schema files for runtime migration.
+# drizzle.config.ts references these via relative imports.
+# We skip __tests__/, sqlite-schema.ts, sqlite-* files to keep the image lean.
+COPY drizzle.config.ts ./
+COPY src/core/db/schema.ts ./src/core/db/schema.ts
+COPY src/core/db/pg-*.ts ./src/core/db/
+COPY src/core/kanban/ ./src/core/kanban/
+COPY src/core/models/ ./src/core/models/
+
+# Entrypoint: run migration if postgres, then start server
+COPY <<'EOF' /entrypoint.sh
+#!/bin/sh
+set -e
+
+if [ "${ROUTA_DB_DRIVER}" = "postgres" ] && [ -n "${DATABASE_URL}" ]; then
+  echo "[entrypoint] Running database migration..."
+  cd /app
+  npx drizzle-kit push
+  echo "[entrypoint] Migration complete."
+fi
+
+echo "[entrypoint] Starting Routa server..."
+exec node /app/server.js
+EOF
+RUN chmod +x /entrypoint.sh
+
+ENV HOME=/home/nextjs
+RUN mkdir -p /home/nextjs/.routa && chown -R nextjs:nodejs /home/nextjs
+
 USER nextjs
 
 EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
-CMD ["node", "server.js"]
+CMD ["/entrypoint.sh"]

@@ -69,9 +69,8 @@ COPY --from=builder /app/public ./public
 RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 
 # Database migration tools for runtime schema push (Postgres support)
-# drizzle-orm is already in standalone node_modules (prod dep)
-# These are devDeps not included in standalone output
-RUN npm install --no-save --legacy-peer-deps drizzle-kit@0.31.9 tsx@4.21.0 postgres@3.4.8
+# Install globally to avoid standalone node_modules structure conflicts
+RUN npm install -g drizzle-kit@0.31.9 tsx@4.21.0 postgres@3.4.8
 
 # Copy drizzle config and schema files for runtime migration.
 # drizzle.config.ts references these via relative imports.
@@ -90,12 +89,13 @@ set -e
 if [ "${ROUTA_DB_DRIVER}" = "postgres" ] && [ -n "${DATABASE_URL}" ]; then
   echo "[entrypoint] Running database migration..."
   cd /app
-  ls -la node_modules/.bin/ 2>/dev/null | head -5 || echo "(no .bin dir)"
-  node node_modules/drizzle-kit/bin.cjs push --config=drizzle.config.ts || {
-    echo "[entrypoint] drizzle-kit failed, trying npx..."
-    npx --no-install drizzle-kit push
-  }
-  echo "[entrypoint] Migration complete."
+  echo "[entrypoint] Using drizzle-kit from: $(which drizzle-kit 2>/dev/null || echo '(not in PATH)')"
+  if command -v drizzle-kit >/dev/null 2>&1; then
+    drizzle-kit push --config=drizzle.config.ts
+    echo "[entrypoint] Migration complete."
+  else
+    echo "[entrypoint] ERROR: drizzle-kit not found in PATH. Skipping migration."
+  fi
 fi
 
 echo "[entrypoint] Starting Routa server..."

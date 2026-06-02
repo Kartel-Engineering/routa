@@ -85,3 +85,15 @@ spec:
           ANTHROPIC_AUTH_TOKEN:
             default: ''
             description: Your Anthropic API key for Claude Code SDK
+          WORKSPACE_AGENT_PROVIDER:
+            default: ''
+            description: 'LLM provider backend: anthropic | openai | zhipu | minimax'
+          OPENAI_API_KEY:
+            default: ''
+            description: API key for OpenAI-compatible endpoint (Heimdall)
+          OPENAI_BASE_URL:
+            default: ''
+            description: Base URL for OpenAI-compatible endpoint (e.g. https://heimdall.example.com/v1)
+          WORKSPACE_AGENT_MODEL:
+            default: ''
+            description: Model name for workspace agent (e.g. gpt-4o)

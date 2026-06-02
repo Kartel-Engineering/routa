@@ -90,7 +90,7 @@ set -e
 if [ "${ROUTA_DB_DRIVER}" = "postgres" ] && [ -n "${DATABASE_URL}" ]; then
   echo "[entrypoint] Running database migration..."
   cd /app
-  npx drizzle-kit push
+  ./node_modules/.bin/drizzle-kit push
   echo "[entrypoint] Migration complete."
 fi
 

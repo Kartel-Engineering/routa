@@ -104,6 +104,7 @@ EOF
 RUN chmod +x /entrypoint.sh
 
 ENV HOME=/home/nextjs
+ENV NODE_PATH=/usr/local/lib/node_modules
 RUN mkdir -p /home/nextjs/.routa && chown -R nextjs:nodejs /home/nextjs
 
 USER nextjs

@@ -70,7 +70,7 @@ RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 
 # Database migration tools for runtime schema push (Postgres support)
 # Install globally to avoid standalone node_modules structure conflicts
-RUN npm install -g drizzle-kit@0.31.9 tsx@4.21.0 postgres@3.4.8
+RUN npm install -g drizzle-kit@0.31.9 drizzle-orm@^0.41.0 tsx@4.21.0 postgres@3.4.8
 
 # Copy drizzle config and schema files for runtime migration.
 # drizzle.config.ts references these via relative imports.
